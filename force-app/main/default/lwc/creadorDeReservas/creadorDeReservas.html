@@ -1,0 +1,117 @@
+<template>
+
+    <lightning-card title="cree su reserva" icon-name="standard:opportunity">
+        <div class="slds-m-around_medium">
+            <lightning-combobox 
+                name="tipoId" 
+                label="Tipo de Identidad" 
+                value={value} 
+                placeholder="Seleccione un tipo"
+                options={options} 
+                onchange={handleChange}>
+            </lightning-combobox>
+
+            <lightning-input name="nroId" label="Numero de documento" type="text" onchange={handleChange}></lightning-input>
+            <lightning-button variant="brand" label="buscar" title="buscar" onclick={buscarContacto}
+                class="slds-m-left_x-small"></lightning-button>
+        </div>
+
+    </lightning-card>   
+
+    <template if:true={ModCrearCont}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">crear contacto</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div>
+                    <c-contact-creator></c-contact-creator>
+                </div>
+
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_brand" onclick={hideCrearCont}
+                        title="Aceptar">Confirmar</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={ModCrearRes}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={hideCrearRes}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">confirmar reserva</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <lightning-card>
+                    <lightning-input label="nombre del contacto" value={nombreContacto} read-only>
+                    </lightning-input>
+                    <lightning-input label="tipo de identidad" value ={tipo} read-only>
+                    </lightning-input>
+                    <lightning-input label="Numero de identidad" value ={doc} read-only>
+                    </lightning-input>
+                    <c-modificador-reservas oncerrar={showToastReserva}></c-modificador-reservas>
+                </lightning-card>
+
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_brand" onclick={hideCrearRes}
+                        title="Aceptar">Terminar</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={ModResExistente}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={hideCrearRes}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">Error</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <p>
+                    ya tiene una reserva creada
+                </p>
+
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_brand" onclick={hideCrearRes}
+                        title="Aceptar">Regresar</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+</template>

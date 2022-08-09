@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Solo_Viajes_Nacionales__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>requiere saber si el viaje que realiza es nacional</description>
+    <externalId>false</externalId>
+    <label>¿Solo Viajes Nacionales?.</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

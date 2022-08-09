@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Detalles_de_Aeropuerto</fullName>
+    <fields>Name</fields>
+    <fields>Codigo_IATA__c</fields>
+    <fields>Nombre_del_Aeropuerto__c</fields>
+    <fields>Cuidad__c</fields>
+    <fields>Pais__c</fields>
+    <label>Detalles de Aeropuerto</label>
+</CompactLayout>

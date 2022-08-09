@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Recibe_vuelos_internacionales__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Requiere saber si el aeropuerto recibe vuelos internacionales</description>
+    <externalId>false</externalId>
+    <label>¿Recibe vuelos internacionales?</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>
