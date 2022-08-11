@@ -51,13 +51,15 @@ export default class NuevaReserva extends LightningElement {
         switch(event.target.name){
             case 'tipoId':
                 this.value = event.detail.value;
-                break;
+            break;
+
             case 'nroId':
                 this.numeroIdent= event.detail.value;
-                break;
+            break;
+            
             case 'listaPrecio':
                 this.precioSeleccionado = event.detail.value;
-                break;
+            break;
             
         }
     }

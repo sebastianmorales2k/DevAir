@@ -39,9 +39,20 @@ public with sharing class contactoReserva {
         return nuevaReserva;
     }
 
-    @AuraEnabled(cacheable = true)
-    public static OpportunityLineItem crearTiquete(){
-        
+    @AuraEnabled
+    public static List<OpportunityLineItem> crearTiquete(string reserva, string contacto, List<string> vuelo){
+        try {
+            List<OpportunityLineItem> listaTiq = new List<OpportunityLineItem>();
+            for(string IdV : vuelo){
+                OpportunityLineItem newTiquete = new OpportunityLineItem(OpportunityId = reserva, Product2Id = IdV, Quantity = 1, Pasajero__c = contacto);
+                listaTiq.add(newTiquete);
+            }
+            insert listaTiq;
+            return listaTiq;
+        } catch (Exception e) {
+            return null;
+            //throw new AuraHandledException(e.getMessage());
+        }
     }
 
     @AuraEnabled(cacheable = true)

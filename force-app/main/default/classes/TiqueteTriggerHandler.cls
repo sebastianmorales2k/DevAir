@@ -11,6 +11,8 @@ public without sharing class TiqueteTriggerHandler implements TriggerHandler{
     public void beforeInsert(List<OpportunityLineItem> newRecords) {
         agregarTiqueteVuelo(newRecords);
         AsignarClaseNegocios(newRecords);
+        PasajeroDeReserva(newRecords);
+
        
     }
     public void beforeUpdate(List<OpportunityLineItem> oldRecords, List<OpportunityLineItem> newRecords, Map<ID, SObject> oldRecordMap, Map<ID, SObject> newRecordMap) {
@@ -39,9 +41,9 @@ public without sharing class TiqueteTriggerHandler implements TriggerHandler{
         {
             idTiquetes.add(Tiquete.Product2Id);
         }
-        map<id , product2> productos = new map<id , product2>([SELECT ID,Avion__r.Id,Avion__r.N_mero_de_pasajeros_clase_negocios__c,Avion__r.N_mero_de_pasajeros_clase_Turista__c 
+        map<id , product2> productos = new map<id , product2>([SELECT ID,Avion__r.N_mero_de_pasajeros_clase_negocios__c,Avion__r.N_mero_de_pasajeros_clase_Turista__c 
                                                                 FROM Product2 WHERE Id IN :idTiquetes]); 
-        AggregateResult[] groupedResults = [SELECT Count(Id),Product2Id FROM OpportunityLineItem where Product2Id IN :idTiquetes GROUP BY Product2Id  ];
+        AggregateResult[] groupedResults = [SELECT Count(Id),Product2Id FROM OpportunityLineItem WHERE Product2Id IN :idTiquetes GROUP BY Product2Id  ];
         List<Product2> vuelos = new List<Product2>();
         for (AggregateResult ar : groupedResults){
             system.debug(ar.get('Product2Id'));
@@ -60,20 +62,32 @@ public without sharing class TiqueteTriggerHandler implements TriggerHandler{
         }
     }
 
-    
-
-    public static void AsignarClaseNegocios(List<OpportunityLineItem> tiquetes){
-        set <Id> idVuelos = new set<Id>();
-        for (OpportunityLineItem tiq : tiquetes) {
-            idVuelos.add(tiq.product2id);            
+    public static void AsignarClaseNegocios(List<OpportunityLineItem> tiqueteNew)
+    {
+        Pricebook2 listaPrecio = [SELECT Id FROM Pricebook2 WHERE name = 'clase negocio' limit 1];
+        set<Id> idReserva = new set<Id>();
+        for (OpportunityLineItem tiquete: tiqueteNew) {
+            idReserva.add(tiquete.OpportunityId);
         }
-        String idNegocios = [SELECT id FROM Pricebook2 WHERE Name = 'Tiquetes Clase Negocios' LIMIT 1].Id;
-        List<PricebookEntry> listEntry = [SELECT Id, Pricebook2Id, Product2Id FROM PricebookEntry WHERE Pricebook2Id =: IdNegocios AND Product2Id IN : idVuelos];
-        for (PricebookEntry enLis: listEntry) {
-            for (OpportunityLineItem tiq : tiquetes) {
-                if (tiq.product2id == enLis.product2id){
-                    tiq.Equipaje_permitido__c = 'Maleta de cabina;Maleta de bodega';
+        List<Opportunity> reservas = [SELECT Id FROM Opportunity WHERE Id IN : idReserva And Pricebook2Id =: listaPrecio.Id ];
+        for(OpportunityLineItem t: tiqueteNew){
+            for(Opportunity r: reservas){
+                if(t.OpportunityId == r.Id){
+                    t.Equipaje_permitido__c = 'Personal;Maleta de Cabina;Maleta de Bodega';
                 }
+            }
+        }
+    }
+
+    public static void PasajeroDeReserva (List<OpportunityLineItem> tiquetes){
+        List <Opportunity> reservas = new List<Opportunity>([SELECT Id,Titular_de_la_Reserva__c FROM Opportunity WHERE StageName = 'Pre-Venta']);
+        for(opportunity reserva : reservas){
+            for(opportunityLineItem tiquete : tiquetes){
+                if (tiquete.OpportunityId == reserva.Id){
+                    if(tiquete.Pasajero__c == null){
+                        tiquete.Pasajero__c = reserva.Titular_de_la_Reserva__c;
+                    }
+                }       
             }
         }
     }

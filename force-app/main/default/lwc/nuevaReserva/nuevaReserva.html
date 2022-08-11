@@ -1,5 +1,5 @@
 <template>
-
+    <!--validacion de identidad con numero y tipo de identidad-->
     <lightning-layout multiple-rows class="busqueda">
         <lightning-layout-item size="12" class="itemss">
         <lightning-combobox
@@ -18,7 +18,7 @@
         </lightning-layout-item>
     </lightning-layout>
 
-    
+    <!--modal cuando el contacto no existe y abre formulario para crearlo-->
     <template if:true={contactFalse}>
         <!-- Modal/Popup Box LWC starts here -->
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-2" class="slds-modal slds-fade-in-open">
@@ -104,7 +104,7 @@
                     </div>
                     
                         <lightning-card title="Seleccionar Vuelo" if:true={crearOpp}>
-                            <c-listar-vuelo id-precio={reservaListaPrecio} if:true={crearOpp}></c-listar-vuelo>
+                            <c-listar-vuelo res-id={reservaId} con-id={idcontact} id-precio={reservaListaPrecio} if:true={crearOpp}></c-listar-vuelo>
                         </lightning-card>
                         
                 </div>

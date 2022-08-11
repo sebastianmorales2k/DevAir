@@ -1,5 +1,10 @@
 import { LightningElement, wire, track, api } from 'lwc';
- import listaVuelos from '@salesforce/apex/contactoReserva.obtenerVuelos';
+import listaVuelos from '@salesforce/apex/contactoReserva.obtenerVuelos';
+import crearTiquete from '@salesforce/apex/contactoReserva.crearTiquete';
+import crearPasajero from '@salesforce/apex/contactoReserva.crearTiquete';
+import comprobarPasajero from '@salesforce/apex/contactoReserva.crearTiquete';
+
+
 
 const columns = [
     { label: 'Nombre del Vuelo', fieldName: 'codigo', sortable: "true" },
@@ -32,7 +37,42 @@ export default class ListarVuelos extends LightningElement {
     @track sortBy;
     @track sortDirection;
     @track isModalOpen = false;
+    @track tiqueteTitular;
     @api idPrecio;
+   // @api opportunityId;
+    @api recordId;
+    @api resId;
+    @api conId;
+    ids= [];
+    value = 'Cedula de Ciudadania';
+    idVueloSelect;
+    contactSelect;
+    vueloSeleccionado;
+    contactFalse = false;
+    contactTrue =false;
+    tiqCreado = false;
+
+    get options() {
+        return [
+            { label: 'Cedula de Ciudadania', value: 'Cedula de Ciudadania' },
+            { label: 'Cedula de Extranjeria', value: 'Cedula de Extranjeria' },
+            { label: 'Tarjeta de Identidad', value: 'Tarjeta de Identidad' },
+        ];
+    }
+
+    handleChange(event) {
+        
+        switch(event.target.name){
+            case 'tipoId':
+                this.value = event.detail.value;
+                console.log("lista-->"+this.value);
+                break;
+            case 'nroId':
+                this.numeroIdent= event.detail.value;
+                console.log("numero-->"+this.numeroIdent);
+                break;
+        }
+    }
 
     @wire(listaVuelos,{idListaPrecios: '$idPrecio'})vuelos(result){
         if (result.data) {
@@ -45,19 +85,35 @@ export default class ListarVuelos extends LightningElement {
         }
     }
 
+
+
     getSelectedRec() {
-        this.isModalOpen = true;
+        this.tiqCreado = true;
         var selectedRecords =  this.template.querySelector("lightning-datatable").getSelectedRows();
         if(selectedRecords.length > 0){
-   
-            let ids = '';
+            console.log('selectedRecords are ', selectedRecords);
+            console.log('lista de precio: '+ this.idPrecio );
             selectedRecords.forEach(currentItem => {
-                ids = ids + ',' + currentItem.idVuelo;
-            });
-            this.selectedIds = ids.replace(/^,/, '');
-            this.lstSelectedRecords = selectedRecords;
-        }   
-    }
+                this.idVueloSelect= currentItem.idVuelo;
+                console.log('vuelo: '+ this.idVueloSelect);
+                this.ids.push(this.idVueloSelect);
+        });
+        console.log('cuantos vuelos selecciono: '+ this.ids.length);
+        console.log(this.ids);
+        console.log(this.resId);
+        console.log(this.conId);
+        crearTiquete({reserva: this.resId, vuelo: this.ids, contacto: this.conId})
+            .then((resultado)=> {
+                this.tiqueteTitular = resultado;
+                console.log('tiquete creado');
+                this.tiqCreado = true;
+                this.error= undefined;
+            }).catch((errores) => {
+                console.log(errores);
+            })
+        } 
+    } 
+ 
 
     doSorting(event) {
         this.sortBy = event.detail.fieldName;
@@ -84,5 +140,86 @@ export default class ListarVuelos extends LightningElement {
     }
     closeModal() {
         this.isModalOpen = false;
+        this.tiqCreado = false;
     }
+
+    getseleccionvuelo(event){
+        const selectedRows = event.detail.selectRows;
+        this.vueloSeleccionado = selectedRows[0].codigo;
+        console.log(this.vueloSeleccionado);
+    }
+
+    get idcontact(){
+        if(this.contactSelect != null){
+            return this.contactSelect.Id;
+        }else{
+            return '';
+        }
+    }
+
+    get namecontact(){
+        if(this.contactSelect != null){
+            return this.contactSelect.Name;
+        }else{
+            return '';
+        }
+    }
+
+    get numidcontact(){
+        if(this.contactSelect != null){
+            return this.contactSelect.N_mero_de_indetificacion__c;
+        }else{
+            return '';
+        }
+    }
+
+    get pasaportecontact(){
+        if(this.contactSelect != null){
+            return this.contactSelect.N_mero_de_Pasaporte__c;
+        }else{
+            return '';
+        }
+    }
+
+    pasajeroOpp(event){
+        console.log(this.numeroIdent + this.value);
+        comprobarPasajero({tipoId: this.value, numId: this.numeroIdent})
+            .then((result) => {
+                this.contactSelect= result.contacto;
+                console.log('contacto-->'+this.contactSelect);
+                if(this.contactSelect == undefined){
+                    this.contactFalse = true;
+                    this.contactTrue = false;
+                }else{
+                    this.contactTrue = true;
+                    this.contactFalse = false;
+                }
+                this.error = undefined;
+                
+            }).catch((error) => {
+                this.error = error;
+                this.contactSelect = undefined;
+            });
+
+    }
+
+    limpiar(){
+        this.value = '';
+        this.numeroIdent = '';
+        this.contactTrue = false;
+    }
+
+    crearPasajero(){
+        console.log('crear pasajero');
+        crearPasajero({reserva: this.resId, vuelo: this.ids, contacto: this.conId})
+            .then((resultado)=> {
+                this.tiqueteTitular = this.resultado;
+                console.log('se ha creado exitosamente los tiquetes');
+                this.tiqCreado = true;
+                this.error= undefined;
+            }).catch((errores) => {
+                console.log('error: '+this.errores);
+            })
+    }
+
 }
