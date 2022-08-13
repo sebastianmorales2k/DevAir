@@ -9,9 +9,9 @@ public without sharing class TiqueteTriggerHandler implements TriggerHandler{
     }
 
     public void beforeInsert(List<OpportunityLineItem> newRecords) {
-        agregarTiqueteVuelo(newRecords);
-        AsignarClaseNegocios(newRecords);
-        PasajeroDeReserva(newRecords);
+        //agregarTiqueteVuelo(newRecords);
+        //AsignarClaseNegocios(newRecords);
+        //PasajeroDeReserva(newRecords);
 
        
     }

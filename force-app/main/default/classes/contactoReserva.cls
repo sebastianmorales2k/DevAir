@@ -51,7 +51,6 @@ public with sharing class contactoReserva {
             return listaTiq;
         } catch (Exception e) {
             return null;
-            //throw new AuraHandledException(e.getMessage());
         }
     }
 
