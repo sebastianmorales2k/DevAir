@@ -41,5 +41,21 @@ public with sharing class VueloTriggerHandlerTest {
         }
        
     }
+
+    @isTest
+    private static void cancelarConMotivo(){
+        
+        List<Product2> vuelitos = [Select Id,Name, Estado__c, Motivo_de_cancelaci_n__c From Product2];
+        for(Product2 v: vuelitos){
+            v.Estado__c = 'Cancelado';
+            v.Motivo_de_cancelaci_n__c ='Sobreventa';
+        }
+        update vuelitos;
+        
+        List<Product2> vuelitosActualizados = [Select Id From Product2 Where Motivo_de_cancelaci_n__c != null ];
+        system.assertEquals(50, vuelitosActualizados.size());
+        
+        
+    }
     
 }

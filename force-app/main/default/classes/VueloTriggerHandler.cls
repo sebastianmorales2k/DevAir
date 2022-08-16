@@ -44,4 +44,48 @@ public without sharing class VueloTriggerHandler implements TriggerHandler{
             }
          }
     }
+
+    public void nombreAleatorio(List<Product2> vuelos){
+        for(Product2 v : vuelos){
+            String aleatorio = EncodingUtil.convertToHex(Crypto.generateAesKey(128)).substring(0, 6);
+            v.Name = 'AE-'+aleatorio;
+        }
+    }
+/*
+    public void AsignarTripulacion(List<Product2> vuelos){
+        for(Product2 v : vuelos){
+            DateTime fecha = (v.Fecha_y_hora_de_partida__c).addDays(-7);
+            integer segundo = 0;
+            integer minuto = 0;
+            integer hora = 0;
+            integer dia = fecha.day();
+            integer mes = fecha.month();
+            
+            schedulableAsignarTripulacion m = new schedulableAsignarTripulacion(v.ID,v.Name);
+            String sch = '0 0 0 '+ dia + ' ' + mes + ' ? *';
+            String jobID = system.schedule('Asignar Tripulacion: '+v.Name, sch, m);
+        }
+    }
+*/
+    public void notificationDetripulacion(List<Product2> vuelos){
+        for(Product2 v : vuelos){
+            Messaging.CustomNotification notification = new Messaging.CustomNotification();
+            CustomNotificationType notificationType = [SELECT Id, DeveloperName FROM CustomNotificationType WHERE DeveloperName='Asignar_tripulantes'];
+            List<user> usuarios = [SELECT id, name FROM user WHERE UserRole.Name = 'Administrador del sistema'];
+            set<String> ids = new set<String>();
+            for(user a: usuarios){
+                ids.add(a.Id);
+            }
+            notification.setTitle('Asignar Tripulacion:  ');
+            notification.setBody('asignar la tripulacion'+ v.Name);
+            notification.setNotificationTypeId(notificationType.Id);
+            notification.setTargetId(v.Id); 
+            try {
+                notification.send(ids);
+            }
+            catch (Exception e) {
+                System.debug('Problem sending notification: ' + e.getMessage());
+            }
+        }
+    }
 }

@@ -1,6 +1,7 @@
 import { LightningElement, wire, track, api } from 'lwc';
 import listaVuelos from '@salesforce/apex/contactoReserva.obtenerVuelos';
 import crearTiquete from '@salesforce/apex/contactoReserva.crearTiquete';
+import pasajerosDisponibles from '@salesforce/apex/contactoReserva.obtenerPasajeros';
 import crearPasajero from '@salesforce/apex/contactoReserva.crearTiquete';
 import comprobarPasajero from '@salesforce/apex/contactoReserva.crearTiquete';
 
@@ -30,6 +31,10 @@ const columns = [
         minute: "2-digit"
     } },
 ];
+const columnas = [
+    {label: 'Pasajero', fieldName: 'Pasajero__r.Name'},
+    {label: 'número de silla', fieldName: 'Asiento__c'},
+]
 
 export default class ListarVuelos extends LightningElement {
     @track columns = columns;
@@ -38,16 +43,19 @@ export default class ListarVuelos extends LightningElement {
     @track sortDirection;
     @track isModalOpen = false;
     @track tiqueteTitular;
+
     @api idPrecio;
-   // @api opportunityId;
+  //@api opportunityId;
     @api recordId;
     @api resId;
     @api conId;
+    
     ids= [];
     value = 'Cedula de Ciudadania';
     idVueloSelect;
     contactSelect;
     vueloSeleccionado;
+
     contactFalse = false;
     contactTrue =false;
     tiqCreado = false;
@@ -72,6 +80,20 @@ export default class ListarVuelos extends LightningElement {
                 console.log("numero-->"+this.numeroIdent);
                 break;
         }
+    }
+
+    seleccionPasajero(){
+
+        console.log('Entro a lista pasajeros');
+        pasajerosDisponibles({resId: this.resId , idOwner: this.conId})
+            .then((resultado)=> {
+                this.datos = resultado;
+                console.log('lista pasajeros');
+                console.log(resultado);
+            }).catch((errores) => {
+                console.log('error:');
+                console.log(this.errores);
+            })
     }
 
     @wire(listaVuelos,{idListaPrecios: '$idPrecio'})vuelos(result){
@@ -209,7 +231,7 @@ export default class ListarVuelos extends LightningElement {
         this.contactTrue = false;
     }
 
-    crearPasajero(){
+    nuevoPasajero(){
         console.log('crear pasajero');
         crearPasajero({reserva: this.resId, vuelo: this.ids, contacto: this.conId})
             .then((resultado)=> {

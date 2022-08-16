@@ -10,11 +10,9 @@ public without sharing class ReservaTriggerHandler implements TriggerHandler{
 
     public void beforeInsert(List<SObject> newRecords) {
         NombreDeReserva(newRecords);
-        ReservaPagada(newRecords);
-        AsignarVuelos(newRecords);
+        //ReservaPagada(newRecords);
     }
     public void beforeUpdate(List<SObject> oldRecords, List<SObject> newRecords, Map<ID, SObject> oldRecordMap, Map<ID, SObject> newRecordMap) {
-        System.debug('En este momento se esta ante de insertar');
         AsignarVuelos(newRecords);
     }
     public void beforeDelete(List<SObject> oldRecords, Map<ID, SObject> oldRecordMap) {
@@ -49,7 +47,7 @@ public without sharing class ReservaTriggerHandler implements TriggerHandler{
             }
         }
     }
-    
+    /*
     public static void ReservaPagada(List<Opportunity> reserva){
         for (Opportunity opp : reserva){
             if (opp.StageName == 'Pagado') {
@@ -74,19 +72,7 @@ public without sharing class ReservaTriggerHandler implements TriggerHandler{
             }            
         }
     }
-    private static Boolean inspectResults(Messaging.SendEmailResult[] results) {
-        Boolean sendResult = true;
-        for (Messaging.SendEmailResult res : results) {
-            if (res.isSuccess()) {
-                System.debug('Email sent successfully');
-            }
-            else {
-                sendResult = false;
-                System.debug('The following errors occurred: ' + res.getErrors());                 
-            }
-        }
-        return sendResult;
-    }
+    */
     public static void AsignarVuelos(List<Opportunity> oportunidad){
         for(Opportunity reserva : oportunidad){
             if((reserva.Numero_de_vuelos__c < 1 && reserva.StageName == 'Pagado')||(reserva.Numero_de_vuelos__c < 1 && reserva.StageName == 'Completado')){

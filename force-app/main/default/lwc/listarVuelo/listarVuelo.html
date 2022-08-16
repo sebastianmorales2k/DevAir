@@ -13,68 +13,50 @@
         </lightning-datatable>
     </div>
     <lightning-button onclick={getSelectedRec} label="confirmar Tiquete"></lightning-button>
-    <!-- Modal para el tiquete -->
-    <template if:true={tiqCreado}>
-        <!-- Modal/Popup Box LWC starts here -->
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-            <div class="slds-modal__container">
-                <!-- Modal/Popup Box LWC header here -->
-                <header class="slds-modal__header">
-                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
-                        <lightning-icon icon-name="utility:close"
-                            alternative-text="close"
-                            variant="inverse"
-                            size="small" ></lightning-icon>
-                        <span class="slds-assistive-text">Close</span>
-                    </button>
-                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">asigne otro pasajero</h2>
-                </header>
-                <!-- Modal/Popup Box LWC body starts here -->
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <lightning-layout multiple-rows if:true={contactFalse}>
-                        <lightning-layout-item size="12" class="itemss">
-                            <lightning-combobox
-                                name="tipoId"
-                                label="Tipo de Identificacion"
-                                value={value}
-                                placeholder="Selecciona el tipo de identificacion"
-                                options={options}
-                                onchange={handleChange} ></lightning-combobox>
-                            </lightning-layout-item>
-                        <lightning-layout-item size="12" class="itemss">
-                            <lightning-input name="nroId" onchange={handleChange} label="Numero de Identificacion" type="text" required></lightning-input>
-                        </lightning-layout-item>
-
-                    </lightning-layout>
-                </div>
-                <template if:true={contactFalse}>
-                    <lightning-card>
-                        <lightning-layout multiple-rows class="busqueda">
-                            <lightning-layout-item size="12" class="itemss">
-                               <c-crear-contacto-v tipo-id={value} num-id={numeroIdent}></c-crear-contacto-v>
-                            </lightning-layout-item>
-                        </lightning-layout>
-                    </lightning-card> 
-                </template>
-                <lightning-card  title="Asignar Pasajeros" if:true={contactTrue}>
-                    <lightning-button label="Limpiar" slot="actions" onclick={limpiar}></lightning-button>
-                    <lightning-button label="Asignar" slot="actions" onclick={crearPasajero}></lightning-button>
-                        <lightning-layout multiple-rows class="busqueda">
-                            <lightning-layout-item size="6" class="itemss">
-                                <lightning-input type="text" label="Nombre Completo" value={namecontact} read-only></lightning-input>
-                                <lightning-input type="text" label="Numero de Pasaporte" value={pasaportecontact} read-only></lightning-input>
-                            </lightning-layout-item>
-                            <lightning-layout-item size="6" class="itemss">
-                                <lightning-input type="text" label="Numero de Identificacion" value={numidcontact} read-only></lightning-input>
-                            </lightning-layout-item>
-                        </lightning-layout>
-                </lightning-card>
-                <!-- Modal/Popup Box LWC footer starts here -->
-                <footer class="slds-modal__footer">
-                    <button class="slds-button slds-button_brand" onclick={closeModal} title="Confirmar tiquete individual">confirmar tiquetes</button>
-                </footer>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
+     
+    <lightning-layout multiple-rows if:true={tiqCreado}>
+        <div>
+            <lightning-datatable
+            key-field="id"
+            data={datos}                
+            columns={columnas}
+            hide-checkbox-column></lightning-datatable>
+        </div>
+        <lightning-layout-item size="12" class="itemss">
+            <lightning-combobox
+                name="tipoId"
+                label="Tipo de Identificacion"
+                value={value}
+                placeholder="Selecciona el tipo de identificacion"
+                options={options}
+                onchange={handleChange} ></lightning-combobox>
+            </lightning-layout-item>
+        <lightning-layout-item size="12" class="itemss">
+            <lightning-input name="nroId" onchange={handleChange} label="Numero de Identificacion" type="text" value={numeroIdent} required></lightning-input>
+        </lightning-layout-item>
+        <lightning-layout-item size="12" class="itemss">
+            <lightning-button class="slds-align_absolute-center" label="Buscar" value="brand" onclick={pasajeroOpp}></lightning-button>
+        </lightning-layout-item>
+    </lightning-layout>
+    <template if:true={contactFalse}>
+        <br>  
+        <lightning-layout multiple-rows class="busqueda">
+            <lightning-layout-item size="12" class="itemss">
+               <c-crear-contacto-v tipo-id={value} num-id={numeroIdent}></c-crear-contacto-v>
+            </lightning-layout-item>
+        </lightning-layout>
     </template>
+    <lightning-card  title="Asignar Pasajeros" if:true={contactTrue}>
+        <lightning-button label="Limpiar" slot="actions" onclick={limpiar}></lightning-button>
+        <lightning-button label="Asignar" slot="actions" onclick={nuevoPasajero}></lightning-button>
+            <lightning-layout multiple-rows class="busqueda">
+                <lightning-layout-item size="6" class="itemss">
+                    <lightning-input type="text" label="Nombre Completo" value={namecontact} read-only></lightning-input>
+                    <lightning-input type="text" label="Numero de Pasaporte" value={pasaportecontact} read-only></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" class="itemss">
+                    <lightning-input type="text" label="Numero de Identificacion" value={numidcontact} read-only></lightning-input>
+                </lightning-layout-item>
+            </lightning-layout>
+    </lightning-card> 
 </template>

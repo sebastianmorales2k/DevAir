@@ -78,6 +78,19 @@ public with sharing class contactoReserva {
         } 
     }
 
+    @auraEnabled(cacheable=true)
+    public static List<OpportunityLineItem> obtenerPasajeros(string resId, string conId){
+        try {
+            List<OpportunityLineItem> tiqPasajeros = [SELECT Id, Pasajero__r.Name, Product2Id, Asiento__c FROM OpportunityLineItem WHERE
+                                                            OpportunityId =: resId And Pasajero__c != :conId];
+			
+            return tiqPasajeros;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+        
+    }
+
 
 
     public class ctoReserva{
