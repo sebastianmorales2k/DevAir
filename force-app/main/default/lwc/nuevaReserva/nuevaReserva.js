@@ -161,7 +161,7 @@ export default class NuevaReserva extends LightningElement {
     }
    
     createReserva(event){
-        crearteReserva({idContactito: String(this.contact.Id),listaPrecio: this.precioSeleccionado})
+        crearteReserva({contaId: String(this.contact.Id),listaPrecio: this.precioSeleccionado})
                         .then((result) => {
                             this.erroresReserva = undefined;
                             this.newOpp = result;

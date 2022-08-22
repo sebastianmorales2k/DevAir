@@ -15,22 +15,27 @@ trigger TiqueteTrigger on OpportunityLineItem (before insert, before update, bef
 
         when  BEFORE_DELETE{
             System.debug('En este momento se esta ante de insertar');    
+            Tiquete.beforeDelete(trigger.old,trigger.oldMap);
         }
 
         when  AFTER_INSERT{
             System.debug('despues de insertar');    
+            Tiquete.afterInsert(trigger.new,trigger.newMap);
         }
 
         when  AFTER_UPDATE{
-            System.debug('En este momento se esta ante de insertar');    
+            System.debug('En este momento se esta ante de insertar'); 
+            Tiquete.afterUpdate(trigger.old,trigger.new,trigger.oldMap, trigger.newMap);   
         }
 
         when  AFTER_DELETE{
-            System.debug('En este momento se esta ante de insertar');    
+            System.debug('En este momento se esta ante de insertar');
+            Tiquete.afterDelete(trigger.old,trigger.oldMap);    
         }
 
         when  AFTER_UNDELETE{
-            System.debug('En este momento se esta ante de insertar');    
+            System.debug('En este momento se esta ante de insertar');
+            Tiquete.afterUndelete(trigger.new,trigger.newMap);
         }
 
         when else {

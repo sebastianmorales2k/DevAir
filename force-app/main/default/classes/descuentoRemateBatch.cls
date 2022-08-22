@@ -1,6 +1,6 @@
 public with sharing class descuentoRemateBatch implements Database.Batchable<sObject>{
     DateTime ahora = Datetime.now();
-    DateTime veintiuatro = Datetime.now().addHours(24);    
+    DateTime veinticuatro = Datetime.now().addHours(24);    
     public Database.QueryLocator start(Database.BatchableContext context){
         return Database.getQueryLocator('SELECT id, Fecha_y_hora_de_partida__c FROM Product2');
     }
@@ -8,7 +8,7 @@ public with sharing class descuentoRemateBatch implements Database.Batchable<sOb
     public void execute(Database.BatchableContext BC, List<Product2> vuelos){
         List<String> entradaPrecios = new List<String>();
         for(Product2 vuelo : vuelos){
-            if (vuelo.Fecha_y_hora_de_partida__c >= ahora && vuelo.Fecha_y_hora_de_partida__c <= veintiuatro) {
+            if (vuelo.Fecha_y_hora_de_partida__c >= ahora && vuelo.Fecha_y_hora_de_partida__c <= veinticuatro) {
                 entradaPrecios.add(vuelo.Id);
             }      
         }

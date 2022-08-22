@@ -1,78 +1,130 @@
 @isTest
 public class contactoReservaTest {
-    
+
     @TestSetup
     static void makeData(){
-        string pricebookId = Test.getStandardPricebookId();
-        Pricebook2 standardPricebook = new Pricebook2(
-            Id = pricebookId,
-            IsActive = true
-        );
-        update standardPricebook;
-        
-        Pricebook2 negocio = new Pricebook2(Name = 'clase negocio',IsActive = true);
-        insert negocio;
-        
-        Avion__c avion = new Avion__c (N_mero_de_pasajeros_clase_negocios__c = 10,N_mero_de_pasajeros_clase_Turista__c = 10);
-        insert avion;
-        
-        Contact contactOppFalse = new Contact (firstName = 'señor', lastName = 'prueba', Tipo_de_Indetificacion__c = 'Cédula de Ciudadania',
-                                                    N_mero_de_indetificacion__c= '222', Nacionalidad__c = 'colombiano', Birthdate = Date.newInstance(1999, 05, 09) );
-        insert contactOppFalse;
-                           
-        Contact contactOppTrue = new Contact (firstName = 'señora', lastName = 'prueba', Tipo_de_Indetificacion__c = 'Cédula de Ciudadania', 
-                                                    N_mero_de_indetificacion__c= '333', Nacionalidad__c = 'colombiano', Birthdate = Date.newInstance(1999, 05, 09) );
-        insert contactOppTrue;
-                           
-        Opportunity oppContact = new Opportunity (Titular_de_la_reserva__c= contactOppTrue.Id,Name = 'señora',CloseDate = Date.today().addDays(1),StageName = 'Pre-venta',
-                                                       Pricebook2Id = negocio.Id );
-        insert oppContact;
-        
-        list<Aeropuerto__c> aeropuertos = new List<Aeropuerto__c>();
-        for(integer i = 0 ; i < 2; i++){
-            Aeropuerto__c aeropuerto = new Aeropuerto__c(Nombre_del_Aeropuerto__c = 'jose maria'+i , Pais__c = 'Colombia', Cuidad__c = 'Bogotá', Codigo_IATA__c = 'CCC');
-            aeropuertos.add(aeropuerto);
+        List<Contact> contactos = new List<Contact>();
+        for (Integer i = 0; i < 2 ; i++) {
+            contact contacto = new contact(Tipo_de_Indetificacion__c = 'Tarjeta de Identidad',
+                                        N_mero_de_indetificacion__c = '1'+i,
+                                        FirstName = 'señor', LastName = 'pruebas');
+            contactos.add(contacto);
         }
-        insert aeropuertos;
-        
-        product2 vuelo = new product2(Name = 'vueloprueba', Aeropuerto_de_partida__c =aeropuertos[0].id, Aeropuerto_de_llegada__c = aeropuertos[1].id,Estado__c = 'en venta',IsActive = true,
-                                        Fecha_y_hora_de_partida__c = Date.newInstance(2022, 08, 22),Avion__c = avion.Id,
-                                        Fecha_y_hora_estimada_de_llegada__c = Date.newInstance(2022, 08, 23));
-        insert vuelo;
+        insert contactos;
+        string id = contactos[1].Id;
 
-        PricebookEntry entrada = new PricebookEntry(Pricebook2Id = pricebookId,UnitPrice=20,Product2Id=vuelo.Id,IsActive = true);
+        Avion__c avion = new Avion__c(Aeronave__c = 'avion de pruebas', N_mero_de_pasajeros_clase_negocios__c = 32,N_mero_de_pasajeros_clase_turista__c = 200);
+        insert avion;
+
+
+        //Data para metodo obtenerVuelo        
+        List<Product2> Vuelos = new List<Product2>();
+        for(Integer i = 0; i < 2; i++){
+            String estado;
+            
+            if(i == 0){
+                estado = 'Check in';
+            }
+            else{
+                estado = 'En venta';
+            }
+
+            Product2 vuelo = new Product2(Name = 'AE-00'+i, Fecha_y_hora_de_partida__c = System.today().addDays(i+1),Estado__c = estado,
+                                            Fecha_y_hora_estimada_de_llegada__c = System.today().addDays(i+2), Avion__c = avion.Id, IsActive = true);
+            Vuelos.add(vuelo);
+            system.debug(System.today().addDays(i+1));
+
+            system.debug(System.today().addDays(i+2));
+        }
+
+        insert Vuelos;
+        String idV = Vuelos[1].Id;
+        System.debug(idV);
+
+        System.debug(Vuelos[1].Name);
+        
+        Id idEstandar = Test.getStandardPricebookId();
+        PricebookEntry standardPrice = new PricebookEntry( Pricebook2Id = idEstandar, Product2Id = idV, UnitPrice = 10000, IsActive = true);
+        insert standardPrice;
+        
+        Pricebook2 turista = new Pricebook2(Name = 'Tiquetes clase turista', IsActive = true);
+        insert turista;
+        Pricebook2 negocios = new Pricebook2(Name = 'Tiquetes Negocios', IsActive = true);  
+        insert negocios;
+        
+        PricebookEntry entrada = new PricebookEntry(Pricebook2Id = turista.id, Product2Id = idV, UnitPrice = 20000, IsActive = true);
         insert entrada;
         
-        PricebookEntry negociando = new PricebookEntry(Pricebook2Id = negocio.Id, UnitPrice=30,Product2Id=vuelo.Id, IsActive = true);
-        insert negociando;
+        Opportunity reserva = new Opportunity(Name = 'A', Titular_de_la_Reserva__c = id, CloseDate = System.today(), StageName = 'Pre-venta', Pricebook2Id = turista.Id);
+        insert reserva;
     }
     
     @isTest
-    private static void contactoFalse() {
-
-        system.assertEquals(null, contactoReserva.clienteReserva('Cédula de ciudadania', '000').contacto);
-        system.assertEquals(null, contactoReserva.clienteReserva('Cédula de ciudadania', '000').oportunidad);
+    static void contactoSinReserva(){
+        contactoReserva.CtoReserva test = contactoReserva.clienteReserva('10' , 'Tarjeta de Identidad');
+        System.assert(test.contacto != null);
+        System.assert(test.oportunidad == null);
     }
 
     @isTest
-    private static void contactOppFalse(){
-        
-        system.assert(contactoReserva.clienteReserva('Cédula de Ciudadania', '222').contacto.Name.contains('señor'));
-        system.assertEquals(null, contactoReserva.clienteReserva('Cédula de Ciudadania', '222').oportunidad);
+    static void contactoConReserva(){
+        contactoReserva.CtoReserva test = contactoReserva.clienteReserva('11' , 'Tarjeta de Identidad');
+        System.assert(test.contacto != null);
+        System.assert(test.oportunidad != null);
     }
 
     @isTest
-    private static void contactOppTrue(){
-        
-        system.assert(contactoReserva.clienteReserva('Cédula de Ciudadania', '333').contacto.Name.contains('señora'));
-        system.assert(contactoReserva.clienteReserva('Cédula de Ciudadania', '333').oportunidad.StageName.contains('Pre-venta'));
+    static void busquedaFallida(){
+        contactoReserva.CtoReserva test = contactoReserva.clienteReserva('1' , 'Tarjeta de Identidad');
+        System.assert(test.contacto == null);
+        System.assert(test.oportunidad == null);
     }
 
     @isTest
-    private static void fakeContact(){
+    static void obtieneVuelos(){
+        Pricebook2 listaPrecio = [SELECT id From Pricebook2 WHERE NAme = 'Tiquetes clase turista' LIMIT 1];
+        string idlistaPrecio = listaPrecio.Id;
+
+        List<contactoReserva.vuelo> vuelos = contactoReserva.obtenerVuelos(idlistaPrecio);
+
+        System.assertEquals(1, vuelos.size());
+
+    }
+
+    @isTest
+     static void nombrePricebook(){
+        Pricebook2 listaPrecio = [SELECT id,Name From Pricebook2 WHERE NAme = 'Tiquetes clase turista' LIMIT 1];
+        string idAComparar = listaPrecio.Id;
         
-        system.assertEquals(null, contactoReserva.clienteReserva('Cédula de Ciudad', '99999999').contacto);
-        system.assertEquals(null, contactoReserva.clienteReserva('Cédula de Ciudad', '9999999999').oportunidad);
+        string id = contactoReserva.listaPrecios('Tiquetes clase turista');
+        System.assertEquals(idAComparar, id);
+    }
+
+    @isTest
+    static void crearTiquete(){
+        Contact contacto = [SELECT Id From Contact WHERE N_mero_de_indetificacion__c = '11' LIMIT 1];
+        string idContact = contacto.Id;
+
+        system.debug(contacto);
+
+        Opportunity reserva = [SELECT Id FROM Opportunity LIMIT 1];
+        string idReserva = reserva.Id;
+
+        system.debug(contacto +''+ reserva);
+
+        List<Product2> vuelo = [SELECT Id FROM Product2 WHERE Estado__c = 'En venta' ];
+        List<String> idVuelos = new List<String>();
+        for (Product2 v : vuelo) {
+            idVuelos.add(v.Id);
+        }
+        system.debug(idReserva +' '+ idVuelos +' '+ idContact);
+
+        contactoReserva.crearTiquete(idReserva, idContact, idVuelos);
+        
+        List<OpportunityLineItem> tiquetes = [Select Id FROM OpportunityLineItem LIMIT 10];
+        
+        System.assertEquals(1, tiquetes.size());
     }
 }
 
+ 

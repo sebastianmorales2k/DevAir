@@ -21,7 +21,7 @@ public with sharing class accountTriggerHandlerTest {
     static void PruebaMasiva(){
        List<Account> cuentas = new List<Account>();
        
-       for(Integer i = 0; i < 200; i++){
+       for(Integer i = 0; i < 50; i++){
         Account cuenta = new Account (Name = 'cuenta test'+ i);
         cuentas.add(cuenta);
        }
@@ -31,13 +31,13 @@ public with sharing class accountTriggerHandlerTest {
        List<Case> casos = new List<case>();
        casos = [SELECT Id FROM Case];
 
-       system.assertEquals(200, casos.size());
+       system.assertEquals(51, casos.size());
     }
 
     @isTest
     static void actualizar() {
         Account actualizada = [SELECT Id, Name FROM Account WHERE Name ='Test'];
-        actualizada.Name = 'test actualizado';
+        actualizada.Name = 'Test actualizado';
         update actualizada;
 
         Account pruebaUpdate = [SELECT Id, Name FROM Account WHERE Name ='Test actualizado'];

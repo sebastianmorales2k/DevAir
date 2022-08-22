@@ -4,39 +4,44 @@ public with sharing class contactoReserva {
     public static ctoReserva clienteReserva(string tipoId, string numId){
         contact cliente = null;
         Opportunity reserva = null;
-
         List<Contact> contacto = [SELECT Id, Name, N_mero_de_indetificacion__c,	N_mero_de_Pasaporte__c 
-                                    FROM Contact WHERE Tipo_de_Indetificacion__c =: tipoId AND N_mero_de_indetificacion__c =: numId LIMIT 1];
+        FROM Contact WHERE Tipo_de_Indetificacion__c =: tipoId AND N_mero_de_indetificacion__c =: numId LIMIT 1];
 
         List<Opportunity> reservaExistente = new List<Opportunity>();
 
         if(contacto.size() > 0){
-            cliente = contacto[0];
-            reservaExistente = [SELECT Id, Name, StageName FROM Opportunity WHERE StageName NOT IN ('Pagado', 'No pagado') 
-                                AND Titular_de_la_Reserva__c =: cliente.Id LIMIT 1];
+        cliente = contacto[0];
+        reservaExistente = [SELECT Id, Name, StageName FROM Opportunity WHERE StageName NOT IN ('Pagado', 'No pagado') 
+            AND Titular_de_la_Reserva__c =: cliente.Id LIMIT 1];
         }
 
         if(reservaExistente.size() > 0){
-            reserva = reservaExistente[0];
+        reserva = reservaExistente[0];
         }
 
         ctoReserva resultado = new ctoReserva(cliente, reserva);
-        return resultado;          
+        return resultado;
+
     }
 
     @AuraEnabled
-    public static Opportunity crearReserva(string idContactito, string listaPrecio){
-        List<Pricebook2> listasPrecios = [SELECT Id, Name FROM Pricebook2];
-        Id idLista;
-        for(Pricebook2 a: listasPrecios ){
-            if(a.Name == listaPrecio ){
-                idLista = a.Id;
+    public static Opportunity crearReserva(string contaId, string listaPrecio){
+        try {
+            List<Pricebook2> listasPrecios = [SELECT Id, Name FROM Pricebook2];
+            Id idLista;
+            for(Pricebook2 a: listasPrecios ){
+                if(a.Name == listaPrecio ){
+                    idLista = a.Id;
+                }
             }
+            date fechapagar = Date.today();
+            Opportunity nuevaReserva = new Opportunity(Titular_de_la_Reserva__c = contaId, StageName = 'Pre-venta', Name = 'a', CloseDate = fechapagar, Pricebook2Id = idLista);
+            insert(nuevaReserva);
+            return nuevaReserva;
+        } catch (Exception e) {
+            return null;
         }
-        date fechapagar = Date.today();
-        Opportunity nuevaReserva = new Opportunity(Titular_de_la_Reserva__c = idContactito, StageName = 'Pre-venta', Name = 'a', CloseDate = fechapagar, Pricebook2Id = idLista);
-        insert(nuevaReserva);
-        return nuevaReserva;
+
     }
 
     @AuraEnabled
@@ -57,7 +62,7 @@ public with sharing class contactoReserva {
     @AuraEnabled(cacheable = true)
     public static List<vuelo> obtenerVuelos(string idListaPrecios){
         try{
-            List<Product2> listado = [SELECT Id, Name,Aeropuerto_de_partida__r.Name,Aeropuerto_de_partida__r.Pais__c,  
+            List<Product2> listado = [SELECT Id, Name,Aeropuerto_de_partida__r.Name,Aeropuerto_de_partida__r.Pais__c,
                                     Aeropuerto_de_llegada__r.Name,Aeropuerto_de_llegada__r.Pais__c,Fecha_y_hora_de_partida__c,Fecha_y_hora_estimada_de_llegada__c,  
                                     (SELECT unitprice FROM pricebookEntries WHERE Pricebook2Id =: idListaPrecios )FROM Product2 WHERE Estado__c = 'En Venta' AND IsActive = true ];
 
@@ -78,19 +83,17 @@ public with sharing class contactoReserva {
         } 
     }
 
-    @auraEnabled(cacheable=true)
-    public static List<OpportunityLineItem> obtenerPasajeros(string resId, string conId){
-        try {
-            List<OpportunityLineItem> tiqPasajeros = [SELECT Id, Pasajero__r.Name, Product2Id, Asiento__c FROM OpportunityLineItem WHERE
-                                                            OpportunityId =: resId And Pasajero__c != :conId];
-			
-            return tiqPasajeros;
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
-        }
-        
-    }
 
+
+
+
+    @AuraEnabled(cacheable = true)
+    public static string listaPrecios(string entradaDeLista){
+        Pricebook2 precios = [SELECT Id FROM Pricebook2 WHERE  Name =: entradaDeLista LIMIT 1];
+        string nombreLista = precios.Id;
+        return nombreLista;
+    }
+    
 
 
     public class ctoReserva{
@@ -105,6 +108,9 @@ public with sharing class contactoReserva {
         }
 
     }
+
+
+
 
     public class vuelo{
         

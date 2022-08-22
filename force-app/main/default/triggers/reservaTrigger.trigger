@@ -1,40 +1,39 @@
-trigger reservaTrigger on Opportunity (before insert, before update, before delete, after insert, after update, after delete, after undelete) {    
+trigger reservaTrigger on Opportunity (before insert,before update,before delete,after insert,after update, after delete, after undelete) {
+    triggerHandler Reserva = new ReservaTriggerHandler(Trigger.isExecuting, Trigger.size);  
     
-    TriggerHandler Reserva = new ReservaTriggerHandler(trigger.isExecuting, trigger.size);
-
-    switch on trigger.operationType {
-        when  BEFORE_INSERT{
-            system.debug('ingresa before insert');
+    switch on trigger.OperationType {
+        when before_insert {
+            system.System.debug('El desencadenador es antes de insertar');
             Reserva.beforeInsert(trigger.new);
         }
-        
-        when  BEFORE_UPDATE{
-            system.debug('ingresa before update');
-            Reserva.beforeUpdate(trigger.old, trigger.new, trigger.oldMap, trigger.newMap);    
+        when before_update{
+            system.System.debug('El desencadenador es antes de update');
+            Reserva.beforeUpdate(trigger.old,trigger.new,trigger.oldMap, trigger.newMap);
         }
-
-        when  BEFORE_DELETE{
-            System.debug('En este momento se esta ante de insertar');    
+        when before_delete{ 
+            system.System.debug('El desencadenador es antes de delete');
+            Reserva.beforeDelete(trigger.old,trigger.oldMap);
         }
-
-        when  AFTER_INSERT{
-            System.debug('despues de insertar');    
+        when after_insert {
+            system.System.debug('El desencadenador es despues de insertar');
+            Reserva.afterInsert(trigger.new,trigger.newMap);
         }
-
-        when  AFTER_UPDATE{
-            System.debug('En este momento se esta ante de insertar');    
+        when after_update {
+            system.System.debug('El desencadenador es despues de update');
+            Reserva.afterUpdate(trigger.old,trigger.new,trigger.oldMap, trigger.newMap);
         }
-
-        when  AFTER_DELETE{
-            System.debug('En este momento se esta ante de insertar');    
+        when after_delete {
+            system.System.debug('El desencadenador es despues de delete');
+            Reserva.afterDelete(trigger.old,trigger.oldMap);
         }
-
-        when  AFTER_UNDELETE{
-            System.debug('En este momento se esta ante de insertar');    
-        }
-
+        when after_undelete{
+            system.debug('El desencadenador es despues de undelete');
+            Reserva.afterUndelete(trigger.new,trigger.newMap);
+        }        
         when else {
-            System.debug('En este momento no pasa nada');    
+            system.System.debug('El desencadenador es nada');
         }
+
+        
     }
 }

@@ -9,9 +9,9 @@ public with sharing class TiqueteTriggerHandler implements triggerHandler {
     }
     public void beforeInsert(List<OpportunityLineItem> newAccounts){
         // code here 
-        //sobreventa(newAccounts);
-        //equipajeNegocios(newAccounts);
-        //pasajero(newAccounts);
+        sobreventa(newAccounts);
+        equipajeNegocios(newAccounts);
+        pasajero(newAccounts);
     }
     public void beforeUpdate(List<OpportunityLineItem> oldAccounts,List<OpportunityLineItem> newAccounts,Map<ID,SObject> oldAccountMap,Map<ID,SObject> newAccountMap){
         // code here
@@ -31,6 +31,7 @@ public with sharing class TiqueteTriggerHandler implements triggerHandler {
     public void afterUndelete(List<OpportunityLineItem> newAccounts,Map<ID,SObject> newAccountMap){
         // code here
         }
+        
     public static void sobreventa(List<OpportunityLineItem> TiqueteNew)
     {
         set <Id> idTiquetes = new set<Id>();
@@ -54,7 +55,7 @@ public with sharing class TiqueteTriggerHandler implements triggerHandler {
         for(opportunityLineItem a: tiqueteNew){
             for(product2 p: vuelos){
                 if (a.Product2Id==p.Id){
-                    a.adderror('yasesupero la capacidad del vuelo');
+                    a.adderror('supero la capacidad del vuelo');
                 }
             }
         }
@@ -62,16 +63,16 @@ public with sharing class TiqueteTriggerHandler implements triggerHandler {
 
     public static void equipajeNegocios(List<OpportunityLineItem> tiqueteNew)
     {
-        Pricebook2 listaPrecio = [SELECT Id FROM Pricebook2 WHERE name = 'Negocio' LIMIT 1];
+        Pricebook2 listaPrecio = [SELECT Id FROM Pricebook2 WHERE name = 'clase negocio' LIMIT 1];
         set<Id> idReserva = new set<Id>();
         for (OpportunityLineItem tiquete: tiqueteNew) {
             idReserva.add(tiquete.OpportunityId);
         }
-        List<Opportunity> reservas = [SELECT Id FROM Opportunity WHERE Id IN : idReserva AND Pricebook2Id =: listaPrecio.Id ];
+        List<Opportunity> reservas = [SELECT Id FROM Opportunity WHERE Id IN : idReserva And Pricebook2Id =: listaPrecio.Id ];
         for(OpportunityLineItem t: tiqueteNew){
             for(Opportunity r: reservas){
                 if(t.OpportunityId == r.Id){
-                    t.Equipaje_Permitido__c = 'Personal;Maleta de Cabina;Maleta de Bodega';
+                    t.Equipaje_permitido__c = 'Personal;Maleta de cabina;Maleta de bodega';
                 }
             }
         }

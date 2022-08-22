@@ -20,13 +20,13 @@ public with sharing class VueloTriggerHandlerTest {
     static void estadoCancelado(){
     Product2 vuelo = [SELECT id, estado__c , name
                         FROM Product2 LIMIT 1];  
-        vuelo.estado__c = 'Cancelado';
-        vuelo.Motivo_de_cancelaci_n__c = 'aeronaves';
+        vuelo.estado__c = 'cancelado';
+        vuelo.Motivo_de_cancelaci_n__c = 'sobreventa';
         update vuelo;
 
         vuelo = [SELECT id, estado__c , name
                         FROM Product2 LIMIT 1];  
-        System.assertEquals('Cancelado', vuelo.estado__c);
+        System.assertEquals('cancelado', vuelo.estado__c);
     }
 
     @isTest
@@ -53,9 +53,27 @@ public with sharing class VueloTriggerHandlerTest {
         update vuelitos;
         
         List<Product2> vuelitosActualizados = [Select Id From Product2 Where Motivo_de_cancelaci_n__c != null ];
-        system.assertEquals(50, vuelitosActualizados.size());
+        system.assertEquals(1, vuelitosActualizados.size());
+    }
+
+    @isTest
+    private static void borrarRecuperar(){
+        Product2 vuelo = [SELECT Id FROM Product2 LIMIT 1];
+        id idVuelo = vuelo.Id;
         
+        delete vuelo;
         
+        List<Product2> buscarVuelo = [SELECT id FROM Product2 WHERE Id =: idVuelo ];
+        
+        system.assertEquals(0, buscarVuelo.size());
+        
+        Product2 vuelito = new Product2(id = idVuelo);
+        
+        undelete vuelito;
+        
+        List<Product2> buscarVuelo1 = [SELECT id FROM Product2 WHERE Id =: vuelito.Id ];
+        
+        system.assertEquals(1, buscarVuelo1.size());
     }
     
 }

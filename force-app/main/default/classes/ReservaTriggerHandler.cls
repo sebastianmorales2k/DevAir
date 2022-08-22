@@ -8,76 +8,70 @@ public without sharing class ReservaTriggerHandler implements TriggerHandler{
         this.triggerSize = triggerSize;
     }
 
-    public void beforeInsert(List<SObject> newRecords) {
+    public void beforeInsert(List<Opportunity> newRecords) {
         NombreDeReserva(newRecords);
-        //ReservaPagada(newRecords);
-    }
-    public void beforeUpdate(List<SObject> oldRecords, List<SObject> newRecords, Map<ID, SObject> oldRecordMap, Map<ID, SObject> newRecordMap) {
+        correoReserva(newRecords);
         AsignarVuelos(newRecords);
     }
-    public void beforeDelete(List<SObject> oldRecords, Map<ID, SObject> oldRecordMap) {
-        System.debug('En este momento se esta ante de insertar');
+    public void beforeUpdate(List<Opportunity> oldRecords, List<Opportunity> newRecords, Map<ID, SObject> oldRecordMap, Map<ID, SObject> newRecordMap) {
+        AsignarVuelos(newRecords);
+        correoReserva(newRecords);
     }
-    public void afterInsert(List<SObject> newRecords, Map<ID, SObject> newRecordMap) {
-        System.debug('En este momento se esta ante de insertar');
+    public void beforeDelete(List<Opportunity> oldRecords, Map<ID, SObject> oldRecordMap) {
+
     }
-    public void afterUpdate(List<SObject> oldRecords, List<SObject> newRecords, Map<ID, SObject> oldRecordMap, Map<ID, SObject> newRecordMap) {
-        System.debug('En este momento se esta ante de insertar');
+    public void afterInsert(List<Opportunity> newRecords, Map<ID, SObject> newRecordMap) {
+
     }
-    public void afterDelete(List<SObject> oldRecords, Map<ID, SObject> oldRecordMap) {
-        System.debug('En este momento se esta ante de insertar');
+    public void afterUpdate(List<Opportunity> oldRecords, List<Opportunity> newRecords, Map<ID, SObject> oldRecordMap, Map<ID, SObject> newRecordMap) {
+
     }
-    public void afterUndelete(List<SObject> newRecords, Map<ID, SObject> newRecordMap) {
-        System.debug('En este momento se esta ante de insertar');
+    public void afterDelete(List<Opportunity> oldRecords, Map<ID, SObject> oldRecordMap) {
+
+    }
+    public void afterUndelete(List<Opportunity> newRecords, Map<ID, SObject> newRecordMap) {
+
     }
 	
    
+    public static void AsignarVuelos(List<Opportunity> oportunidad){
+        for(Opportunity reserva : oportunidad){
+            if((reserva.N_mero_de_vuelos__c<1 && reserva.StageName == 'Pagado')||(reserva.N_mero_de_vuelos__c<1 && reserva.StageName == 'Completado')){
+                reserva.N_mero_de_vuelos__c.addError('asigne por lo menos un vuelo para continuar');
+            } 
+        }
+    }
+
     public static void NombreDeReserva(List<Opportunity> opportunities) {
         set <Id> TitularesID = new set<Id>();
         for(Opportunity opp : opportunities){
             TitularesID.add(opp.Titular_de_la_Reserva__c);
         }
-        Map<Id, Contact>  Titulares = new Map<Id, Contact>([SELECT Name FROM Contact WHERE Id = : TitularesID]);
+        Map<Id, Contact>  Titulares = new Map<Id, Contact>([SELECT Id,Name FROM Contact WHERE Id = : TitularesID]);
         
         for (Opportunity opp : opportunities) {
             if(String.isNotEmpty(opp.Name)){
-                Integer NumeroDeReserva = Integer.valueof(Math.random() * 100000);
-                opp.Name = Titulares.get(opp.Titular_de_la_Reserva__c).name + NumeroDeReserva;
+                String NumeroDeReserva = EncodingUtil.convertToHex(Crypto.generateAesKey(128)).substring(0, 7);
+                opp.Name = Titulares.get(opp.Titular_de_la_Reserva__c).name.replace(' ','') +'-'+ NumeroDeReserva;
                 System.debug('nombre de reserva: '+ opp.Name);
             }
         }
     }
-    /*
-    public static void ReservaPagada(List<Opportunity> reserva){
-        for (Opportunity opp : reserva){
-            if (opp.StageName == 'Pagado') {
-                opp.Fecha_de_Pago__c = Date.newInstance(Date.today().year(), date.today().month(), Date.today().day());
-                
-                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-
-                String[] toAddresses = new String[] { 'jsebastian.morales18@gmail.com' };                
-                mail.setToAddresses(toAddresses);
-                mail.setReplyTo('support@acme.com');
-                mail.setSenderDisplayName('Salesforce Support');
-                mail.setSubject('CONFIRMACION DE RESERVA');
-                mail.setPlainTextBody('bienvenido '+ opp.Titular_de_la_reserva__c +' su reserva número ' 
-                                    + opp.Numero_de_reserva__c + ' ha sido creada');
-
-                mail.setUseSignature(false);
-
-                Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
-                Messaging.SendEmailResult[] results = Messaging.sendEmail( new Messaging.SingleEmailMessage[] { mail });
-
-                inspectResults(results);
-            }            
-        }
-    }
-    */
-    public static void AsignarVuelos(List<Opportunity> oportunidad){
-        for(Opportunity reserva : oportunidad){
-            if((reserva.Numero_de_vuelos__c < 1 && reserva.StageName == 'Pagado')||(reserva.Numero_de_vuelos__c < 1 && reserva.StageName == 'Completado')){
-                reserva.Numero_de_vuelos__c.addError('debe asignar un vuelo');
+    
+    public static void correoReserva(List<Opportunity> oportunidades){
+        List<String> idContactos= new list<String>();
+        for(Opportunity reserva: oportunidades){
+            if(reserva.StageName == 'Pagado'){
+            	idContactos.add(reserva.Titular_de_la_reserva__c);
             }
         }
-    }
+        if(idContactos.size()>0){
+           EmailTemplate et=[SELECT id FROM EmailTemplate WHERE name = 'Reserva Pagada' LIMIT 1];
+           Messaging.MassEmailMessage mail = new Messaging.MassEmailMessage();
+           mail.setTargetObjectIds(idContactos);
+           mail.setSenderDisplayName('System Admin');
+           mail.setTemplateId(et.id);
+           Messaging.sendEmail(new Messaging.MassEmailMessage[] { mail }); 
+        }
+ 	}
 }

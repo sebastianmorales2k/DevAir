@@ -62,12 +62,11 @@ export default class ListarVuelos extends LightningElement {
 
     get options() {
         return [
-            { label: 'Cedula de Ciudadania', value: 'Cedula de Ciudadania' },
-            { label: 'Cedula de Extranjeria', value: 'Cedula de Extranjeria' },
+            { label: 'Cédula de ciudadania', value: 'Cédula de ciudadania' },
+            { label: 'Cédula de extranjería', value: 'Cédula de extranjería' },
             { label: 'Tarjeta de Identidad', value: 'Tarjeta de Identidad' },
         ];
     }
-
     handleChange(event) {
         
         switch(event.target.name){
@@ -80,6 +79,27 @@ export default class ListarVuelos extends LightningElement {
                 console.log("numero-->"+this.numeroIdent);
                 break;
         }
+    }
+
+    buscarContacto(event){
+        console.log(this.numeroIdent + this.value);
+        comprobarContacto({tipoId: this.value, numId: this.numeroIdent})
+            .then((result) => {
+                this.contact= result.contacto;
+                console.log('contacto-->'+this.contact);
+                if(this.contact == undefined){
+                    this.contactFalse = true;
+                    this.contactTrue = false;
+                }else{
+                    this.contactTrue = true;
+                    this.contactFalse = false;
+                }
+                this.error = undefined;
+                
+            }).catch((error) => {
+                this.error = error;
+                this.contact = undefined;
+            });
     }
 
     seleccionPasajero(){
@@ -110,7 +130,6 @@ export default class ListarVuelos extends LightningElement {
 
 
     getSelectedRec() {
-        this.tiqCreado = true;
         var selectedRecords =  this.template.querySelector("lightning-datatable").getSelectedRows();
         if(selectedRecords.length > 0){
             console.log('selectedRecords are ', selectedRecords);
@@ -162,7 +181,6 @@ export default class ListarVuelos extends LightningElement {
     }
     closeModal() {
         this.isModalOpen = false;
-        this.tiqCreado = false;
     }
 
     getseleccionvuelo(event){
@@ -208,7 +226,7 @@ export default class ListarVuelos extends LightningElement {
         comprobarPasajero({tipoId: this.value, numId: this.numeroIdent})
             .then((result) => {
                 this.contactSelect= result.contacto;
-                console.log('contacto-->'+this.contactSelect);
+                console.log('contacto: '+this.contactSelect);
                 if(this.contactSelect == undefined){
                     this.contactFalse = true;
                     this.contactTrue = false;
@@ -220,7 +238,7 @@ export default class ListarVuelos extends LightningElement {
                 
             }).catch((error) => {
                 this.error = error;
-                this.contactSelect = undefined;
+                //this.contactSelect = undefined;
             });
 
     }
